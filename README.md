@@ -1,9 +1,8 @@
 # Synology-Lenovo-SA120-Fanspeed
 Control the fan speed on the Lenovo SA120 disk array through Synology/Xpenology DSM
 
-# [fanspeed.py](https://github.com/td147x/lenovo-sa120-fanspeed-utility/blob/master/fanspeed.py "fanspeed.py") (Synology DSM compatible)
-## Source
- [Reddit Link](https://www.reddit.com/r/DataHoarder/comments/70z50k/lenovo_sa120_how_to_quieten/dn7465u/)
+
+
 ## Requirements 
 Still requires the sg3-utils install  
 
@@ -24,3 +23,5 @@ Still requires the sg3-utils install
 
 Adjusting 1 - 3 for various levels 
 
+## Source
+ [Reddit Link](https://www.reddit.com/r/DataHoarder/comments/70z50k/lenovo_sa120_how_to_quieten/dn7465u/)
