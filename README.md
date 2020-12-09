@@ -1,10 +1,11 @@
+
 # Synology-Lenovo-SA120-Fanspeed
 Control the fan speed on the Lenovo SA120 disk array through Synology/Xpenology DSM
 
 
 
 ## Requirements 
-Still requires the sg3-utils install  
+Still requires the [sg3-utils](http://sg.danny.cz/sg/sg3_utils.html)   
 
  1. SSH into your Synology/Xpenology
  2. Install oPKG - [Tutorial](https://medium.com/@yehia2amer/how-to-install-a-package-manager-on-a-synology-nas-router-ipkg-opkg-c620890e4c77)
