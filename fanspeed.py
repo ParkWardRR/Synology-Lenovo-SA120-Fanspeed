@@ -23,7 +23,7 @@ if fan <= 0 or fan > 6:
   raise Exception("Fan speed must be between 1 and 7")
 
 
-devices_to_check = ['/dev/sg*','/dev/ses*']
+devices_to_check = ['/dev/sg*']
 
 device = ""
 
@@ -31,7 +31,7 @@ for chk_device in devices_to_check:
   for dev_node in glob.glob(chk_device):
     try:
       out = check_output(["sg_ses", dev_node], stderr=STDOUT)
-      if 'ThinkServerSA120' in out:
+      if 'ThinkServerSA120' in str(out):
         device = dev_node
         print("Enclosure found on " + device);
 
