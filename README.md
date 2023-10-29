@@ -9,7 +9,7 @@ The Installation Steps will install the following prerequisites.
 
 ## Installation Steps
 1. SSH into your Synology/Xpenology DSM
-2. Install Entware (Steps adapted from https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS). Because firmware updates may erase the /opt folder, Entware is deployed outside of rootfs with a "symlink" or "mount -o bind" to /opt. 
+2. Install Entware (Steps adapted from https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS Because firmware updates may erase the /opt folder, Entware is deployed outside of rootfs with a "symlink" or "mount -o bind" to /opt. 
     ``` 
     sudo mkdir -p /volume1/apps/@Entware/opt    # create a location for entware packages
     sudo mv /opt /opt.bak                       # backup previous add-on application software packages
