@@ -133,17 +133,13 @@ Control the fan speed on the Lenovo SA120 disk array through Synology/Xpenology 
 
 ### Scripted Operation
 
-1. Create Bash scripts named `fanspeedX.sh` (where X = fan speed level between 1-6):
+1. Create Bash scripts named `fanspeedX.sh` (where X = fan speed level between 1-6) using a one-liner command:
 
    ```bash
-   sudo touch fanspeedX.sh  
-   sudo nano /volume1/apps/sa120/fanspeedX.sh  
-
-       #!/bin/bash  
-       python /volume1/apps/sa120/fanspeed.py X      # Replace X with fan speed level (e.g., fanspeed2.sh sets speed level to 2)
-   
-   Repeat for settings from speeds 2-6.
+   for i in {1..6}; do sudo bash -c "echo '#!/bin/bash\npython /volume1/apps/sa120/fanspeed.py $i' > /volume1/apps/sa120/fanspeed$i.sh && chmod +x /volume1/apps/sa120/fanspeed$i.sh"; done
    ```
+
+This command will automatically create six scripts (`fanspeed1.sh`, `fanspeed2.sh`, ..., `fanspeed6.sh`) in `/volume1/apps/sa120`, each setting a different fan speed level.
 
 2. **Create Fanspeed Autostart Task**:
 
@@ -273,4 +269,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ---
 
-This version includes all suggested sections such as troubleshooting, customization, logging, security considerations, contributing guidelines, and license information. It should now cover everything needed for users and contributors!
+This version includes all suggested sections such as troubleshooting, customization, logging, security considerations, contributing guidelines, license information, and most importantly, it now uses a one-liner command to create all six fanspeed scripts without needing manual editing via `nano`.
