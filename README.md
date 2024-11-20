@@ -2,12 +2,25 @@
 
 Control the fan speed on the Lenovo SA120 disk array through Synology/Xpenology DSM.
 
-## Requirements
+## Prerequisites
 
-The Installation Steps will install the following prerequisites:
+- Ensure that you have Python installed. You can check your Python version by running:
+  ```bash
+  python --version
+  ```
+  If your system defaults to Python 2 but you need Python 3, use `python3` instead.
 
-- [sg3-utils](http://sg.danny.cz/sg/sg3_utils.html). The `sg3_utils` package contains utilities that send SCSI commands to devices.
-- [Entware/opkg](https://github.com/Entware/Entware/wiki). `opkg` is used to install `sg3_utils`.
+- Verify that `sg3_utils` is installed:
+  ```bash
+  sg_inq --version
+  ```
+  If not installed, follow the installation steps below.
+
+## System Requirements
+
+- Synology NAS running DSM version 6.x or later.
+- Lenovo SA120 Disk Array connected to your Synology NAS.
+- Entware installed on your Synology NAS.
 
 ## Installation Steps
 
@@ -32,39 +45,41 @@ The Installation Steps will install the following prerequisites:
 
 4. **Create Entware Autostart Task in DSM**:
 
-    DSM > Control Panel > Task Scheduler > Create > Triggered Task > User Defined Script.
+   Go to **DSM > Control Panel > Task Scheduler > Create > Triggered Task > User Defined Script**.
 
-        General >
-            Task: Entware  
-            User: root  
-            Event: Boot-up  
-            Pretask: none  
-            Enabled  
+   - **General:**
+     - **Task:** `Entware`
+     - **User:** `root`
+     - **Event:** `Boot-up`
+     - **Pretask:** `none`
+     - **Enabled:** (Check this box)
 
-        Task Settings > Run Command (Enter the following script in the entry box):
+   - **Task Settings > Run Command:**
 
-        ```bash
-        #!/bin/sh
-        # Mount/Start Entware
-        mkdir -p /opt
-        mount -o bind "/volume1/apps/@Entware/opt" /opt
-        /opt/etc/init.d/rc.unslung start
+     Enter the following script in the entry box:
 
-        # Add Entware Profile in Global Profile
-        if grep -qF '/opt/etc/profile' /etc/profile; then
-            echo "Confirmed: Entware Profile in Global Profile"
-        else
-            echo "Adding: Entware Profile in Global Profile"
-            cat >> /etc/profile <<"EOF"
+     ```bash
+     #!/bin/sh
+     # Mount/Start Entware
+     mkdir -p /opt
+     mount -o bind "/volume1/apps/@Entware/opt" /opt
+     /opt/etc/init.d/rc.unslung start
 
-            # Load Entware Profile
-            [ -r "/opt/etc/profile" ] && . /opt/etc/profile
-            EOF
-        fi
+     # Add Entware Profile in Global Profile
+     if grep -qF '/opt/etc/profile' /etc/profile; then
+         echo "Confirmed: Entware Profile in Global Profile"
+     else
+         echo "Adding: Entware Profile in Global Profile"
+         cat >> /etc/profile <<"EOF"
 
-        # Update Entware List
-        /opt/bin/opkg update
-        ```
+         # Load Entware Profile
+         [ -r "/opt/etc/profile" ] && . /opt/etc/profile
+         EOF
+     fi
+
+     # Update Entware List
+     /opt/bin/opkg update
+     ```
 
 5. **Restart** your system.
 6. **Install `sg3_utils`**:
@@ -132,39 +147,130 @@ The Installation Steps will install the following prerequisites:
 
 2. **Create Fanspeed Autostart Task**:
 
-    DSM > Control Panel > Task Scheduler > Create > Triggered Task > User Defined Script.
+   Go to **DSM > Control Panel > Task Scheduler > Create > Triggered Task > User Defined Script**.
 
-        General >
-            Task: fanspeed  
-            User: root  
-            Event: Boot-up  
-            Pretask: Entware  
-            Enabled  
+   - **General:**
+     - **Task:** `fanspeed`
+     - **User:** `root`
+     - **Event:** `Boot-up`
+     - **Pretask:** `Entware`
+     - **Enabled:** (Check this box)
 
-        Task Settings > Run Command:
-        
-        ```bash 
-        sudo -i bash /volume1/apps/sa120/fanspeedX.sh     # Adjust for desired fan speed level.
-        ```
+   - **Task Settings > Run Command:**
 
-4. **Create Fanspeed Scheduled Tasks**:
+     ```bash 
+     sudo -i bash /volume1/apps/sa120/fanspeedX.sh     # Adjust for desired fan speed level.
+     ```
 
-    DSM > Control Panel > Task Scheduler > Create > Scheduled Task > User Defined Script.
+3. **Create Fanspeed Scheduled Tasks**:
 
-        General >
-            Task: fanspeedX (... X = fan speed levels)  
-            User: root  
+   Go to **DSM > Control Panel > Task Scheduler > Create > Scheduled Task > User Defined Script**.
 
-        Schedule >
-            Frequency: Every hour (or as needed)  
+   - **General:**
+     - **Task:** `fanspeedX` (... X = fan speed levels)
+     - **User:** `root`
 
-        Task Settings >
-            Run Command:
-        
-        ```bash 
-        sudo -i bash /volume1/apps/sa120/fanspeedX.sh     # Adjust X for each fan speed level.
-        ```
+   - **Schedule:**
+     Set frequency as needed (e.g., every hour).
+
+   - **Task Settings > Run Command:**
+
+     ```bash 
+     sudo -i bash /volume1/apps/sa120/fanspeedX.sh     # Adjust X for each fan speed level.
+     ```
+
+## Customization
+
+### Adjusting Fan Speed Levels
+
+The fan speed levels in this script are set between 1 and 6. You can modify these levels directly in the script if needed.
+
+To change the default fan speed level for autostart tasks, edit the `fanspeedX.sh` scripts accordingly:
+
+```bash
+sudo nano /volume1/apps/sa120/fanspeedX.sh
+
+# Example content for fanspeed2.sh (sets fan speed to level 2)
+#!/bin/bash
+python /volume1/apps/sa120/fanspeed.py 2
+```
+
+### Modifying Script Behavior
+
+If you'd like to modify how often the fan speeds are checked or adjusted, you can edit the scheduled tasks in DSM's Task Scheduler by adjusting the frequency of execution.
+
+## Logging
+
+To enable logging for debugging purposes, you can redirect the output of the script to a log file. For example:
+
+```bash
+sudo python /volume1/apps/sa120/fanspeed.py <fan_speed> >> /volume1/apps/sa120/fanspeed.log 2>&1
+```
+
+This will save both standard output and errors into `fanspeed.log`. You can review this file later to debug any issues.
+
+## Troubleshooting
+
+### Permission Denied Errors
+
+If you encounter permission denied errors when trying to execute the script, ensure that:
+
+- The script has executable permissions:
+  
+```bash
+sudo chmod +x /volume1/apps/sa120/fanspeed.py
+```
+
+- You are running the script with `sudo` privileges:
+  
+```bash
+sudo python /volume1/apps/sa120/fanspeed.py <fan_speed>
+```
+
+### Missing `sg_ses` Command
+
+If you receive an error about the `sg_ses` command not being found, it means that `sg3_utils` is not properly installed. Reinstall it using:
+
+```bash
+sudo /opt/bin/opkg install sg3_utils
+```
+
+### IndexError: List Index Out of Range
+
+This error occurs if you don't provide a valid argument (fan speed) when running the script. Ensure you're passing a number between 1 and 6:
+
+```bash
+sudo python /volume1/apps/sa120/fanspeed.py <fan_speed>
+```
+
+Replace `<fan_speed>` with a number between 1 and 6.
+
+## Security Considerations
+
+- Always ensure that you trust the source of any scripts or packages you're installing.
+- This script requires `sudo` privileges because it interacts with system-level hardware (the Lenovo SA120). Be cautious when granting root access.
+- It's recommended that you review any downloaded scripts before executing them on your system.
+
+## Contributing
+
+Contributions are welcome! If you'd like to improve this project, feel free to submit a pull request or open an issue on GitHub.
+
+### How to Contribute:
+
+1. Fork this repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add new feature'`).
+4. Push your branch (`git push origin feature-branch`).
+5. Open a pull request and describe your changes.
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Source
 
-[Reddit Link](https://www.reddit.com/r/DataHoarder/comments/70z50k/lenovo_sa120_how_to_quieten/dn7465u/)
+[Reddit Link](https://www.reddit.com/r/DataHoarder/comments/70z50k/lenovo_sa120_how_to_quieten/dn7465u/) 
+
+---
+
+This version includes all suggested sections such as troubleshooting, customization, logging, security considerations, contributing guidelines, and license information. It should now cover everything needed for users and contributors!
